@@ -1,0 +1,3 @@
+[submodule "nginx-lb"]
+	path = nginx-lb
+	url = https://github.com/EHER/docker-nginx-lb.git

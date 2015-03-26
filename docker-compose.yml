@@ -1,0 +1,59 @@
+etcd:
+    image: eher/etcd
+    ports:
+        - 4001
+        - 7001
+
+loadbalancer:
+    image: eher/nginx-lb
+    ports:
+        - 80
+    environment:
+        - ETCD_IP: etcd
+    links:
+        - etcd
+        - helena
+        - leitoranaholanda
+        - paginasbrancas
+        - queroservoluntario
+
+database:
+    image: mysql
+    environment:
+        - MYSQL_ROOT_PASSWORD=1234
+    ports:
+        - 3306
+
+helena:
+    image: wordpress
+    ports:
+        - 80
+    environment:
+        - WORDPRESS_DB_HOST=database
+        - WORDPRESS_DB_NAME=helena
+        - WORDPRESS_DB_PASSWORD=1234
+    links:
+        - database
+
+leitoranaholanda:
+    image: wordpress
+    ports:
+        - 80
+    environment:
+        - WORDPRESS_DB_HOST=database
+        - WORDPRESS_DB_NAME=leitoranaholanda
+        - WORDPRESS_DB_PASSWORD=1234
+    links:
+        - database:mysql
+
+paginasbrancas:
+    image: eher/nginx
+    ports:
+        - 80
+
+queroservoluntario:
+    image: eher/nginx
+    ports:
+        - 80
+    links:
+        - database

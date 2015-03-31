@@ -1,13 +1,13 @@
 etcd:
-    image: eher/etcd
+    image: microbox/etcd
     ports:
-        - 4001
-        - 7001
+        - "4001:4001"
+        - "7001:7001"
 
 loadbalancer:
     image: eher/nginx-lb
     ports:
-        - 80
+        - "80:80"
     environment:
         - ETCD_IP: etcd
     links:
@@ -17,43 +17,53 @@ loadbalancer:
         - paginasbrancas
         - queroservoluntario
 
-database:
+mysql:
     image: mysql
     environment:
         - MYSQL_ROOT_PASSWORD=1234
     ports:
-        - 3306
+        - "3306:3306"
+
+galeracluster:
+    image: paulczar/percona-galera
 
 helena:
     image: wordpress
-    ports:
-        - 80
     environment:
-        - WORDPRESS_DB_HOST=database
+        - WORDPRESS_DB_HOST=mysql
         - WORDPRESS_DB_NAME=helena
         - WORDPRESS_DB_PASSWORD=1234
     links:
-        - database
+        - mysql
 
 leitoranaholanda:
     image: wordpress
-    ports:
-        - 80
     environment:
-        - WORDPRESS_DB_HOST=database
+        - WORDPRESS_DB_HOST=mysql
         - WORDPRESS_DB_NAME=leitoranaholanda
         - WORDPRESS_DB_PASSWORD=1234
     links:
-        - database:mysql
+        - mysql:mysql
 
 paginasbrancas:
     image: eher/nginx
-    ports:
-        - 80
 
 queroservoluntario:
     image: eher/nginx
-    ports:
-        - 80
     links:
-        - database
+        - mysql
+
+teamcityserver:
+    image: eher/teamcity-server
+    ports:
+        - "8111:8111"
+    environment:
+        - TEAMCITY_PACKAGE TeamCity-9.0.3.tar.gz
+        - TEAMCITY_DOWNLOAD http://download.jetbrains.com/teamcity
+
+teamcityagent:
+    image: eher/teamcity-agent
+    links:
+        - teamcityserver
+    environment:
+        - TEAMCITY_SERVER=http://teamcityserver:8111
